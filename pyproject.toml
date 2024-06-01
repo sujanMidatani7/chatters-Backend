@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "chatters-backend"
+version = "0.1.0"
+description = "api for chatters application"
+authors = ["Sujan Midatani <sujanmidatani7@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.1"
+pydantic = "^2.6.4"
+uvicorn = "^0.29.0"
+python-dotenv = "^1.0.1"
+pymongo = {extras = ["srv"], version = "^4.6.3"}
+pillow = "^10.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
