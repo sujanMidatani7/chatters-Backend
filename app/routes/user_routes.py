@@ -4,9 +4,9 @@ from PIL import Image
 import io
 from typing import List, Optional, Dict, Any
 from fastapi.responses import StreamingResponse
-from config.db import DB
-from schema.models import *
-from utils.helper import *
+from app.config.db import DB
+from app.schema.models import *
+from app.utils.helper import *
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ async def update_user(fb_id: str, user_update: UserUpdate):
         raise HTTPException(status_code=404, detail="User not found")
     return CreateUserResponse(get_user(fb_id))
 
-@router.put("/updateUserPic", response_model=StreamingResponse)
+@router.put("/updateUserPic")
 async def update_user_pic(fb_id: str, file: UploadFile = File(...)):
     # Read the image file
     image = Image.open(file.file)
@@ -64,7 +64,7 @@ async def update_user_pic(fb_id: str, file: UploadFile = File(...)):
     
     return await get_user_pic(fb_id)
 
-@router.get("/getUserPic", response_class=StreamingResponse)
+@router.get("/getUserPic")
 async def get_user_pic(fb_id: str):
     user = users_collection.find_one({"fb_id": fb_id})
     if not user:
@@ -86,9 +86,9 @@ async def get_user_pic(fb_id: str):
         "Content-Type": "image/jpeg"
     }
     
-    return StreamingResponse(img_stream, media_type="image/jpeg", headers=headers)
+    return StreamingResponse(img_stream,status_code=200, media_type="image/jpeg", headers=headers)
 
-@router.put("/updateNotifications", response_model=Dict[str, Any])
+@router.put("/updateNotifications")
 async def update_notifications(fb_id: str, notifications: List[Notification]):
     new_notifications = [notification.dict() for notification in notifications]
     result = users_collection.update_one(
@@ -101,7 +101,7 @@ async def update_notifications(fb_id: str, notifications: List[Notification]):
     user = users_collection.find_one({"fb_id": fb_id})
     return {"updated_notifications": user.get("notifications", [])}
 
-@router.post("/addFriend", response_model=Dict[str, str])
+@router.post("/addFriend")
 async def add_friend(fb_id: str, friend_fb_id: str):
     user = users_collection.find_one({"fb_id": fb_id})
     friend = users_collection.find_one({"fb_id": friend_fb_id})
@@ -110,7 +110,7 @@ async def add_friend(fb_id: str, friend_fb_id: str):
     users_collection.update_one({"fb_id": fb_id}, {"$push": {"friends_list": {"friend_id": friend_fb_id, "name": friend["name"]}}})
     return {"status": "success"}
 
-@router.delete("/removeFriend", response_model=Dict[str, str])
+@router.delete("/removeFriend")
 async def remove_friend(fb_id: str, friend_fb_id: str):
     user = users_collection.find_one({"fb_id": fb_id})
     if not user:
@@ -120,8 +120,8 @@ async def remove_friend(fb_id: str, friend_fb_id: str):
         raise HTTPException(status_code=404, detail="Friend not found")
     return {"status": "success"}
 
-@router.get("/getFriends", response_model=Dict[str, Any])
-async def get_friends(fb_id: str):
+@router.get("/getFriends")
+async def get_friends(fb_id: str)-> Dict[str, Any]:
     user = users_collection.find_one({"fb_id": fb_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

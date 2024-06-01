@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.9'
 
 services:
 
@@ -10,24 +10,29 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: chatters
       MONGO_INITDB_ROOT_PASSWORD: backend-123
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: chatters
-      ME_CONFIG_MONGODB_ADMINPASSWORD: backend-123
-      ME_CONFIG_MONGODB_URL: mongodb://chatters:backend-123@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - mongo
     networks:
       - app_network
 
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: chatters
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: backend-123
+  #     ME_CONFIG_MONGODB_URL: mongodb://chatters:backend-123@mongo:27017/
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - mongo
+  #   networks:
+  #     - app_network
+
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "/chatters-app/start.sh" ]
     restart: always
     ports:
       - 8000:8000
@@ -35,7 +40,7 @@ services:
       MONGO_URL: mongodb://chatters:backend-123@mongo:27017/
     depends_on:
       - mongo
-      - mongo-express
+
     networks:
       - app_network
 
