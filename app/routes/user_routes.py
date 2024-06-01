@@ -16,36 +16,38 @@ users_collection = db_instance.get_collection("chatters_db", "users")
 
 # Pydantic models and helper functions (as previously defined)
 
-@router.post("/createUser", response_model=CreateUserResponse)
+@router.post("/createUser", response_model=User)
 async def create_user(user: User):
     
     if users_collection.find_one({"fb_id": user.fb_id}):
         raise HTTPException(status_code=400, detail="User already exists")
     users_collection.insert_one(user.dict())
-    return CreateUserResponse(user)
+    return user
 
 
-@router.get("/getUser", response_model=CreateUserResponse)
+@router.get("/getUser", response_model=User)
 async def get_user(fb_id: str):
     user = users_collection.find_one({"fb_id": fb_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return CreateUserResponse(user)
+    return user
 
 @router.get("/isUser", response_model=IsUserResponse)
 async def is_user(email: str):
     user = users_collection.find_one({"email_id": email})
     if user:
-        return IsUserResponse(True, user=user)
+        res= IsUserResponse().is_user=True
+        res.user=user
+        return res
     else:
-        return IsUserResponse(False)
+        return IsUserResponse()
 
-@router.put("/updateUser", response_model=CreateUserResponse)
+@router.put("/updateUser", response_model=User)
 async def update_user(fb_id: str, user_update: UserUpdate):
     result = users_collection.update_one({"fb_id": fb_id}, {"$set": user_update.dict(exclude_unset=True)})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
-    return CreateUserResponse(get_user(fb_id))
+    return await get_user(fb_id)
 
 @router.put("/updateUserPic")
 async def update_user_pic(fb_id: str, file: UploadFile = File(...)):
