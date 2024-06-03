@@ -2,6 +2,7 @@ import os
 from pymongo import MongoClient, errors
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
+import time
 load_dotenv()
 class DB:
     """
@@ -21,14 +22,20 @@ class DB:
         self.uri = os.getenv("MONGO_URL")
         if not self.uri:
             raise ValueError("No MongoDB URI found in environment variables")
-        try:
-            self.client = MongoClient(self.uri)
-            # Verify connection
-            self.client.admin.command('ping')
-            self.db = self.client.chatters_db
-            print("Connected to MongoDB")
-        except errors.ConfigurationError as e:
-            raise ConnectionError(f"Could not connect to MongoDB: {e}")
+        
+        while True:
+                try:
+                    self.client = MongoClient(self.uri)
+                    # Verify connection
+                    self.client.admin.command('ping')
+                    self.db = self.client.chatters_db
+                    print("Connected to MongoDB")
+                    break
+                except e:
+                    print("Failed to connect to MongoDB, retrying...",e)
+                    time.sleep(5) 
+                    
+            
 
     def get_collection(self, db_name: str, collection_name: str):
         """
