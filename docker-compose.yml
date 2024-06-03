@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: [ "/chatters-app/start.sh" ]
+    command: [ "./start.sh" ]
     restart: always
     ports:
       - 8000:8000
