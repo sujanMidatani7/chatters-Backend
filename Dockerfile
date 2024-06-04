@@ -9,7 +9,7 @@ COPY . .
 # COPY pyproject.toml poetry.lock .env ./
 
 
-# # Install dependencies using Poetry
+#
 RUN pip install -r requirements.txt
 
 EXPOSE 8001
@@ -19,3 +19,5 @@ EXPOSE 8001
 COPY start.sh ./
 
 RUN chmod +x ./start.sh
+
+CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8001"]
